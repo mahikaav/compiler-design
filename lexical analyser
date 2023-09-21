@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
+
+bool is_operator(char c){
+    return (c == '+' || c == '-' || c == '*' || c == '/');
+}
+
+bool is_valid_expression(char* expression){
+    int length = strlen(expression);
+    int parentheses_count = 0;
+    bool last_token_was_operator = true;
+    int l1 = strlen(expression);
+    if (expression[l1-1] == ')' && !isalpha(expression[l1-2])) return false;
+    for (int i = 0; i < length; i++){
+        if (isspace(expression[i])) continue;
+        else if (isalpha(expression[i])){
+            if (!last_token_was_operator) return false;
+            last_token_was_operator = false;
+        } 
+        else if (isdigit(expression[i])){
+            if (!last_token_was_operator) return false;
+            last_token_was_operator = false;
+        } 
+        else if (is_operator(expression[i])){
+            if (last_token_was_operator) return false;
+            last_token_was_operator = true;
+        } 
+        else if (expression[i] == '('){
+            parentheses_count++;
+            if (!last_token_was_operator) return false;
+            last_token_was_operator = true;
+        } 
+        else if (expression[i] == ')'){
+            parentheses_count--;
+            if (parentheses_count < 0)return false;
+            last_token_was_operator = false;
+        } 
+        else return false;
+    }
+    return (parentheses_count == 0 && !last_token_was_operator);
+}
+
+void tokenize_expression(char *expression) {
+    int i = 0;
+    while (expression[i] != '\0') {
+        if (isalpha(expression[i])) {
+            printf("Valid Identifier : '%c'\n", expression[i]);
+        }
+        else if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/') {
+            printf("Valid Operator : '%c'\n", expression[i]);
+        }
+        else if (isspace(expression[i]) || expression[i] == '(' || expression[i] == ')') {
+        }
+        else {
+            printf("Invalid Token : '%c'\n", expression[i]);
+            return;
+        }
+        i++;
+    }
+}
+
+int main() {
+    char expression[100];
+    printf("Enter an expression: ");
+    scanf("%s",expression);
+    if (is_valid_expression(expression)){
+        printf("Valid expression\n");
+        printf("the tokens are\n");
+        tokenize_expression(expression);
+    }
+    else printf("Invalid expression\n");
+    return 0;
+}
