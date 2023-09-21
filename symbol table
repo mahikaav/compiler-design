@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+int isKeyword(char* word) {
+    char* keywords[] = {"auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern", "float", "for", "goto","if", "int","long", "register", "return", "short", "signed","sizeof", "static", "struct", "switch", "typedef", "union","unsigned", "void", "volatile", "while"
+    };
+    int numKeywords = sizeof(keywords) / sizeof(keywords[0]);
+    for (int i = 0; i < numKeywords; i++) {
+        if (strcmp(keywords[i], word) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int isParenthesisBalanced(char* expression) {
+    int length = strlen(expression);
+    int stack[length], top = -1;
+
+    for (int i = 0; i < length; i++) {
+        if (expression[i] == '(' || expression[i] == '[' || expression[i] == '{') {
+            stack[++top] = expression[i];
+        } else if (expression[i] == ')' || expression[i] == ']' || expression[i] == '}') {
+            if (top == -1) {
+                return 0;
+            } else if ((expression[i] == ')' && stack[top] == '(') ||
+                       (expression[i] == ']' && stack[top] == '[') ||
+                       (expression[i] == '}' && stack[top] == '{')) {
+                top--;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    if (top != -1) {
+        return 0;
+    }
+
+    if (expression[length-1] == '+' || expression[length-1] == '-' || expression[length-1] == '*' || expression[length-1] == '/') {
+        return 0;
+    }
+
+    return 1;
+}
+
+
+
+int main() {
+    int index = 0, length, i = 0, j = 0;
+    void *pointer, *address[5];
+    char character, search, expression[100], types[15], operator, word[15];
+
+    printf("Input the expression ending with $ sign:");
+    while ((character = getchar()) != '$') {
+        expression[i] = character;
+        i++;
+    }
+    length = i;
+    expression[length] = '\0';
+
+    if (!isParenthesisBalanced(expression)) {
+        printf("Invalid expression\n");
+        return 0;
+    }
+
+    printf("Given Expression:");
+    i = 0;
+    while (i < length) {
+        printf("%c", expression[i]);
+        i++;
+    }
+    printf("\nSymbol Table \n");
+
+    printf("Symbol \t type");
+    while (j < length) {
+        character = expression[j];
+        if (isalpha(character)) {
+            i = 0;
+            while (isalnum(character)) {
+                word[i] = character;
+                i++;
+                j++;
+                character = expression[j];
+            }
+            word[i] = '\0';
+            if (isKeyword(word)) {
+                printf("\n%s \t\t keyword", word);
+            } else {
+                pointer = malloc(sizeof(int));
+                address[index] = pointer;
+                types[index] = 'i';
+                printf("\n%s \t\t identifier", word);
+                index++;
+            }
+        } else {
+            operator = character;
+            if (operator == '+' || operator == '-' || operator == '*' || operator == '/' || operator == '%' || operator == '>' || operator == '<' || operator == '&' || operator == '^' || operator == '|') {
+                if (j + 1 >= length || expression[j+1] != '=') {
+                    pointer = malloc(sizeof(char));
+                    address[index] = pointer;
+                    types[index] = operator;
+                    printf("\n%c \t\t operator", operator);
+                    index++;
+                } else {
+                    printf("\n%c%c\t\t invalid expression", operator, expression[j+1]);
+                    return 0;
+                }
+            } else if (operator == '(' || operator == ')' || operator == '[' || operator == ']' || operator == '{' || operator == '}') {
+                pointer = malloc(sizeof(char));
+                address[index] = pointer;
+                types[index] = 'p';
+                printf("\n%c \t\t delimiter", operator);
+                index++;
+            }
+            j++;
+        }
+    }
+    return 0;
+}
