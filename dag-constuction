@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct DAGNode {
+    char data;
+    struct DAGNode* left;
+    struct DAGNode* right;
+} DAGNode;
+
+DAGNode* createNode(char data) {
+    DAGNode* newNode = (DAGNode*)malloc(sizeof(DAGNode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    newNode->data = data;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
+
+int isOperator(char c) {
+    if (c == '+' || c == '-' || c == '*' || c == '/') {
+        return 1;
+    }
+    return 0;
+}
+
+DAGNode* constructDAG(char postfix[]) {
+    DAGNode* stack[100];
+    int top = -1;
+    DAGNode* t, * t1, * t2;
+
+    for (int i = 0; postfix[i] != '\0'; i++) {
+        char ch = postfix[i];
+        if (!isOperator(ch)) {
+            t = createNode(ch);
+            stack[++top] = t;
+        } else {
+            t = createNode(ch);
+            t1 = stack[top--];
+            t2 = stack[top--];
+            t->right = t1;
+            t->left = t2;
+            stack[++top] = t;
+        }
+    }
+
+    t = stack[top--];
+    if (top != -1) {
+        printf("Invalid postfix expression\n");
+        exit(1);
+    }
+
+    return t;
+}
+
+void printDAG(DAGNode* root) {
+    if (root != NULL) {
+        printf("%c ", root->data);
+        if (root->left != NULL || root->right != NULL) {
+            printf(" -> ");
+        }
+        printDAG(root->left);
+        printDAG(root->right);
+    }
+}
+
+int main() {
+    char postfix[100];
+    printf("Enter the postfix expression: ");
+    scanf("%s", postfix);
+    DAGNode* root = constructDAG(postfix);
+    printf("DAG representation: ");
+    printDAG(root);
+    printf("\n");
+    return 0;
+}
