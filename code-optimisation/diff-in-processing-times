@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <time.h>
+
+int main() {
+    int n;
+    printf("Enter a number: ");
+    scanf("%d", &n);
+
+    clock_t start_time, end_time;
+    double original_time, optimized_time;
+
+    // Original code
+    start_time = clock();
+
+    // Compile-time evaluation
+    int compile_time_result = n * 5;
+
+    // Constant folding
+    int constant = 10;
+
+    // Constant/variable propagation
+    int result = compile_time_result + constant;
+
+    // Dead code elimination
+    result += 0; // Dead code
+
+    // Common sub-expression elimination
+    int common_sub_expression = n * 5;
+    result += common_sub_expression + common_sub_expression;
+
+    // Induction variable and strength reduction
+    for (int i = 0; i < n; i++) {
+        result += common_sub_expression;
+    }
+
+    // Code motion
+    int temp = common_sub_expression;
+    for (int i = 0; i < n; i++) {
+        result += temp;
+    }
+
+    end_time = clock();
+    original_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+
+    printf("Original Code: Result = %d\n", result);
+    printf("Original Code: Time taken = %.6f seconds\n", original_time);
+
+    // Optimized code
+    start_time = clock();
+
+    // Compile-time evaluation, constant folding, and constant/variable propagation
+    int optimized_result = n * 5 + 10;
+
+    // Code motion
+    int optimized_temp = n * 5;
+    for (int i = 0; i < n; i++) {
+        optimized_result += optimized_temp;
+    }
+
+    end_time = clock();
+    optimized_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+
+    printf("Optimized Code: Result = %d\n", optimized_result);
+    printf("Optimized Code: Time taken = %.6f seconds\n", optimized_time);
+    printf("Processing Time Difference: %.6f seconds\n", original_time - optimized_time);
+
+    return 0;
+}
