@@ -1,0 +1,62 @@
+//lex
+%{
+#include "y.tab.h"
+#include <stdio.h>
+extern int yylex();
+extern int valid;
+%}
+
+%%
+[a-zA-Z_][a-zA-Z_0-9]* {
+    return letter;
+}
+[0-9]+ {
+    return digit;
+}
+. {
+    printf("\nIt is not an identifier!\n");
+    valid = 0;
+}
+\n {
+    return 0;
+}
+%%
+
+int yywrap() {
+    return 1;
+}
+
+//yacc
+%{
+#include <stdio.h>
+extern int yylex();
+int yyerror(const char* s);
+int valid = 1;
+%}
+
+%token digit letter
+
+%%
+
+start : letter s
+s : letter s
+  | digit s
+  |
+  ;
+%%
+
+int yyerror(const char* s) {
+    printf("\n%s\n", s);
+    valid = 0;
+    return 0;
+}
+
+int main() {
+    printf("\nEnter a name to be tested for an identifier: ");
+    yyparse();
+    if (valid) {
+        printf("\nIt is an identifier!\n");
+    }
+    return 0;
+}
+
